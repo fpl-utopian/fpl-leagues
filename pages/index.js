@@ -23,7 +23,7 @@ function Row({rdata, i}) {
   return (
     <tr className="border-dotted border-2 border-sky-500 ...">
       <td>{i}</td>
-      <td>{id}</td>
+      <td><a href={`https://fantasy.premierleague.com/entry/${id}/history`} rel="noreferrer" target='_blank'>{id}</a></td>
       <td>{player_name}</td>
       <td>{team}</td>
       <td>{fpl}</td>
@@ -75,7 +75,7 @@ function Table({ mdata, setSortOpts }) {
 
 export default function Home() {
   const [data, setData] = useState([])
-  const [sortOpts, setSortOpts] = useState( { key: 'md', order: 1 } )
+  const [sortOpts, setSortOpts] = useState( { key: 'fpl', order: 1 } )
 
   useEffect(() => {
     fetch('/api/scores')

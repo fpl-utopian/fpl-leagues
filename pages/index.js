@@ -25,7 +25,6 @@ function Row({rdata, i}) {
       <td>{i}</td>
       <td><a href={`https://fantasy.premierleague.com/entry/${id}/history`} rel="noreferrer" target='_blank'>{id}</a></td>
       <td>{player_name}</td>
-      <td>{team}</td>
       <td>{fpl}</td>
       <td>{md}</td>
       <td>{odds}</td>
@@ -40,7 +39,6 @@ function Table({ mdata, setSortOpts }) {
   const mappedKeys = { nr: 'Nr.',
                     id: 'ID',
                     player_name: 'Manager',
-                    team: 'Team',
                     fpl: 'FPL',
                     md: 'MD',
                     odds: 'Odds',

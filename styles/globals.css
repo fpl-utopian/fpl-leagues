@@ -5,3 +5,15 @@
 body {
   @apply text-white bg-gray-800;
 }
+
+main > table, h1 {
+  @apply mx-auto text-center;
+}
+
+thead > tr > th {
+  @apply py-2 px-4 border border-slate-600;
+}
+
+tbody > tr > td {
+  @apply py-1 px-2 border border-gray-400;
+}

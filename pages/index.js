@@ -49,7 +49,10 @@ function Table({ mdata, setSortOpts }) {
                   }
 
   function handleClick(e) {
-    setSortOpts((opts) => { return {...opts, key: e.target.id, order: opts.order*-1 } } )
+    setSortOpts((opts) => {
+      const order = opts.key !== e.target.id ? { order: 1 } : { order: opts.order*-1 } 
+      return {...opts, key: e.target.id, ...order }
+    })
   }
 
   return (

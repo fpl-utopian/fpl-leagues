@@ -75,7 +75,7 @@ export default function Home() {
   const [sortOpts, setSortOpts] = useState( { key: 'md', order: 1 } )
 
   useEffect(() => {
-    fetch('http://104.207.130.64:8090/')
+    fetch('/api/scores')
       .then((response) => {
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -104,8 +104,8 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="mx-auto px-4">
-        <h1 className="text-3xl font-blue-200 ...">
-          Elite leagues
+        <h1 className="text-4xl my-6 font-blue-200 ...">
+        Analytics Elite 64 (D1, D2) + #Elite64 + #elite64NOR
         </h1>
         <Table mdata={data} setSortOpts={setSortOpts}/>
       </main>

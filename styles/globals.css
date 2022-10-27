@@ -3,17 +3,23 @@
 @tailwind utilities;
 
 body {
-  @apply text-white bg-gray-800;
+  @apply bg-slate-800 text-slate-200;
 }
 
-main > table, h1 {
-  @apply mx-auto text-center;
+thead th#player_name {
+  @apply text-left;
+}
+thead th#variance {
+  @apply text-center px-6;
+}
+thead th#fpl,#md,#odds,#xG {
+  @apply text-right;
 }
 
-thead > tr > th {
-  @apply py-2 px-4 border border-slate-600;
+tbody tr td {
+  @apply py-1 px-2 border-x border-slate-700;
 }
 
-tbody > tr > td {
-  @apply py-1 px-2 border border-gray-400;
+tbody td:nth-of-type(2) > a:hover {
+  @apply text-sky-300;
 }

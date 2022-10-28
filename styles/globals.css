@@ -23,3 +23,13 @@ tbody tr td {
 tbody td:nth-of-type(2) > a:hover {
   @apply text-sky-300;
 }
+
+table {   
+  counter-reset: rowNumber;
+}
+table tbody tr {
+  counter-increment: rowNumber;
+}
+table tbody tr td:first-child::before {   
+  content: counter(rowNumber);
+}

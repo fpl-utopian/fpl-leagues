@@ -1,6 +1,13 @@
 import Head from 'next/head'
 import { useEffect, useState } from 'react'
 
+const bg = {
+  '935263': 'indigo-800',
+  '937008': 'fuchsia-800',
+  '24490': 'teal-800',
+  '171269': 'amber-800',
+}
+
 function sortData(data, key, s) {
   const unsorted = [...data]
   function compareScores(a, b) {
@@ -13,17 +20,32 @@ function sortData(data, key, s) {
     if (a[key] < b[key]) return s;
     return 0;
   }
+  
   if(Object.keys(unsorted[0].scores).includes(key)) return unsorted.sort(compareScores)
   return unsorted.sort(compareKeys)
 }
 
-function Row({ rdata, i, filter }) {
-  const { id, player_name, team } = rdata
+function Row({ rdata, i, hidden}) {
+  const { id, player_name, team, leagues } = rdata
   const { fpl, md, xG, odds, variance } = rdata.scores
 
+  function paintRow(arr) {
+    let color = ''
+    const l = arr.sort((a,b)=>b-a)
+    const n = l.length
+    switch (n) {
+      case 1: color = `bg-${bg[l[0]]}`; break;
+      case 2: color = `bg-gradient-to-r from-${bg[l[0]]} to-${bg[l[1]]}`; break;
+      case 3: color = `bg-gradient-to-r from-${bg[l[0]]} via-${bg[l[1]]} to-${bg[l[2]]}`; break;
+      case 4: color = `bg-gradient-to-r from-${bg[l[2]]} via-${bg[l[1]]} to-${bg[l[0]]}`; break;
+      default: break;
+    }
+    return color
+  }
+
   return (
-    <tr className={`${filter.test(player_name) ? '' : 'hidden'} border-y border-slate-700`}>
-      <td className='text-center'>{i}</td>
+    <tr className={`${hidden} border-y border-slate-700 ${paintRow(rdata.leagues)}`}>
+      <td className='text-center'></td>
       <td className='text-left'>
         <a href={`https://fantasy.premierleague.com/entry/${id}/history`}
            title={id} rel="noreferrer" target='_blank'>{player_name}</a>
@@ -37,7 +59,7 @@ function Row({ rdata, i, filter }) {
   )
 }
 
-function Table({ mdata, setSortOpts, filter }) {
+function Table({ setSortOpts, filter, toggledLeagues, filteredData }) {
   
   const mappedKeys = { nr: '#',
                     player_name: 'Manager',
@@ -56,7 +78,7 @@ function Table({ mdata, setSortOpts, filter }) {
   }
 
   return (
-    <table className="relative text-right border border-slate-700 ...">
+    <table className="text-right border border-slate-700 ...">
       <thead>
         <tr className='text-center hover:cursor-pointer'>
           {Object.keys(mappedKeys).map((k,i,arr) => {
@@ -65,21 +87,56 @@ function Table({ mdata, setSortOpts, filter }) {
         </tr>
       </thead>
       <tbody>
-        {mdata.map((entry, i) => {
-            return <Row key={entry.id} rdata={entry} i={i+1} filter={filter}/>
-        })}
+        {filteredData[0]?.managers
+          ? filteredData[0].managers.map((entry, i) => {
+            const hidden = (toggledLeagues.find(l=>entry.leagues.includes(l)) && filter.test(entry.player_name)) ? "" : "hidden "
+            return <Row key={entry.id} rdata={entry} i={i+1} hidden={hidden}/>
+          })
+          : null
+      }
       </tbody>
     </table>
+  )
+}
+
+function LeagueToggler({ leagues, toggledLeagues, setToggledLeagues, setFilteredData }) {
+  if(!leagues) return
+  
+  function handleToggle(e) {
+    const id = Number(e.target.name)
+    if(e.target.checked) {
+      !toggledLeagues.includes(id) && setToggledLeagues(l=>[...l, id])
+    }
+    else {
+      setToggledLeagues(l=>l.filter(s => s !== id))
+    }
+  }
+
+  return (
+    <h1 className="w-fit text-left text-xl my-6 font-blue-200 ...">
+      {leagues.map((league,id) => {
+        return (
+        <div className={`bg-${bg[league.id]}`} key={id}>
+          <input onChange={handleToggle} type="checkbox" id={league.id} name={league.id} defaultChecked={true}/>
+          <label htmlFor={league.id}> {league.name}</label>
+        </div>
+        )}
+      )}
+    </h1>
   )
 }
 
 export default function Home() {
   const [data, setData] = useState([])
   const [sortOpts, setSortOpts] = useState( { key: 'fpl', order: 1 } )
-  const [filter, setFilter] = useState(new RegExp('', 'i'))
+  const [filter, setFilter] = useState(new RegExp('', 'iu'))
+  const [toggledLeagues, setToggledLeagues] = useState([])
+  const [filteredData, setFilteredData] = useState([])
 
   function handleChange(e) {
-    setFilter(new RegExp(e.target.value, 'i'))
+    const string = e.target.value.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+    const pattern = new RegExp(string, 'iu')
+    setFilter(pattern)
   }
 
   useEffect(() => {
@@ -88,20 +145,28 @@ export default function Home() {
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
-    
         return response.json();
       })
       .then((json) => {
-        setData(json);
+        setData([json]);
       })
   },[])
 
   useEffect(() => {
+    data[0]?.leagues && setToggledLeagues(data[0].leagues.reduce((acc,v)=>{ acc.push(v.id); return acc },[]))
+    setFilteredData([...data])
+  },[data])
+
+  useEffect(() => {
+    filteredData[0]?.manager && setFilteredData(filtered => filtered[0].manager.filter(m => m.leagues.find(l => toggledLeagues.includes(l))) )
+  },[toggledLeagues])
+
+  useEffect(() => {
     let sorted
-    if(data.length > 0) {
-      sorted = sortData(data, sortOpts.key, sortOpts.order);
-      setData(sorted);
-  }
+    if(filteredData[0]?.managers) {
+      sorted = sortData(filteredData[0].managers, sortOpts.key, sortOpts.order);
+      setFilteredData([{ ...sorted, managers: sorted }])
+    }
   },[sortOpts.order, sortOpts.key])
 
   return (
@@ -112,11 +177,9 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className='w-fit mx-auto flex flex-col justify-center'>
-        <h1 className="text-center text-xl my-6 font-blue-200 ...">
-        Analytics Elite 64 (D1, D2) + #Elite64 + #elite64NOR
-        </h1>
+        <LeagueToggler leagues={data[0]?.leagues} toggledLeagues={toggledLeagues} setToggledLeagues={setToggledLeagues} setFilteredData={setFilteredData}/>  
         <input className='w-1/3 mb-1 ml-0 text-lg bg-slate-700 focus:bg-slate-600 focus:outline-0 shadow-inner shadow-gray-800/100' onChange={handleChange}/>
-        <Table mdata={data} setSortOpts={setSortOpts} filter={filter}/>
+        <Table mdata={data} setSortOpts={setSortOpts} filter={filter} toggledLeagues={toggledLeagues} filteredData={filteredData}/>
       </main>
       <footer>
         <p></p>

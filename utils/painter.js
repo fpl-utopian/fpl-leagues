@@ -3,6 +3,7 @@ const bgColors = {
     '937008': 'd2',
     '24490': 'e64',
     '171269': 'nor64',
+    '1040053': 'bw_discord'
 }
 
 function bgPaint(arr) {

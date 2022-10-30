@@ -7,9 +7,10 @@ import dateFormater from '../utils/date'
 function Row({ rdata, i, hidden, bgStyle}) {
   const { id, player_name, leagues } = rdata
   const { fpl, md, xG, odds, variance } = rdata.scores
+  const varc = Math.round(Number(variance) * 1000)/10
 
   return (
-    <tr className={`${hidden} ${bgStyle} border-y border-slate-700`}>
+    <tr className={`${hidden} ${bgStyle} border-y border-slate-700 opacity-80`}>
       <td className='text-center'></td>
       <td className='text-left'>
         <a href={`https://fantasy.premierleague.com/entry/${id}/history`}
@@ -19,7 +20,7 @@ function Row({ rdata, i, hidden, bgStyle}) {
       <td>{md}</td>
       <td>{odds}</td>
       <td>{xG}</td>
-      <td className='text-center ...'>{variance}</td>
+      <td className='text-center ...'>{varc}</td>
     </tr>
   )
 }
@@ -53,8 +54,8 @@ function Table({ setSortOpts, filter, toggledLeagues, managers }) {
       </thead>
       <tbody>
         {managers[0]?.id && managers.map((entry, i) => {
-            const leagueColor = bgColors[toggledLeagues.find(l => entry.leagues.includes(l))]
             const hidden = (toggledLeagues.find(l=>entry.leagues.includes(l)) && filter.test(entry.player_name)) ? "" : "hidden "
+            const leagueColor = hidden !== 'hidden ' ? bgColors[toggledLeagues.find(l => entry.leagues.includes(l))] : 'bg-inherit'
             return <Row key={entry.id} rdata={entry} i={i+1} hidden={hidden} bgStyle={leagueColor}/>
           })
       }
@@ -63,7 +64,7 @@ function Table({ setSortOpts, filter, toggledLeagues, managers }) {
   )
 }
 
-function LeagueToggler({ leagues, toggledLeagues, setToggledLeagues }) {
+function LeagueToggler({ leagues, toggledLeagues, setToggledLeagues, sortOpts, managers }) {
   
   function handleToggle(e) {
     const id = Number(e.target.name)
@@ -73,17 +74,21 @@ function LeagueToggler({ leagues, toggledLeagues, setToggledLeagues }) {
   }
 
   return (
-    <h1 className="w-fit text-left text-xl my-6 font-blue-200 ...">
+    <h1 className="flex justify-evenly w-fit text-left text-xl my-6 font-blue-200 ...">
+      <div>
       {leagues[0]?.id && leagues.map((league,id) => {
         return (
         <div key={id}>
           <input className='w-4 h-4 text-blue-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600'
                  onChange={handleToggle} type="checkbox"
                  id={league.id} name={league.id} defaultChecked={toggledLeagues.includes(league.id) ? true : false}/>
-          <label className={`ml-2 league-shadow pr-1 rounded ${bgColors[league.id]}`} htmlFor={league.id}> {league.name}</label>
+          <label className={`ml-2 league-shadow pr-1 rounded ${bgColors[league.id]}`} htmlFor={league.id}>{league.name}</label>
+          <span className='ml-2'></span>
         </div>
         )}
       )}
+      </div>
+      <div className='w-fit'><span></span></div>
     </h1>
   )
 }
@@ -139,7 +144,7 @@ export default function Home() {
         <div className='flex flex-row-reverse'>
           <span className='block text-sm self-end'>{timestmp}</span>
         </div>
-        <LeagueToggler leagues={leagues} toggledLeagues={toggledLeagues} setToggledLeagues={setToggledLeagues}/>  
+        <LeagueToggler leagues={leagues} toggledLeagues={toggledLeagues} setToggledLeagues={setToggledLeagues} sortOpts={sortOpts} managers={managers}/>  
         <input className='w-1/3 mb-1 ml-0 text-lg bg-slate-700 focus:bg-slate-600 focus:outline-0 shadow-inner shadow-gray-800/100' onChange={handleChange}/>
         <Table setSortOpts={setSortOpts} filter={filter} toggledLeagues={toggledLeagues} managers={managers}/>
       </main>

@@ -55,7 +55,8 @@ function Table({ setSortOpts, filter, toggledLeagues, managers, filteredManagers
       <tbody>
         {filteredManagers[0]?.id && filteredManagers.map((entry, i) => {
             const hidden = (toggledLeagues.find(l=>entry.leagues.includes(l)) && filter.test(entry.player_name)) ? "" : "hidden "
-            const leagueColor = hidden !== 'hidden ' ? bgColors[toggledLeagues.find(l => entry.leagues.includes(l))] : 'bg-inherit'
+            const leagueColor =  hidden !== 'hidden ' ? bgColors[toggledLeagues.find(l => entry.leagues.includes(l))] : 'bg-inherit'
+            //const leagueColor =  bgColors[entry.leagues[0]]
             return <Row key={entry.id} rdata={entry} i={i+1} hidden={hidden} bgStyle={leagueColor}/>
           })
       }
@@ -99,7 +100,7 @@ export default function Home() {
   const [managers, setManagers] = useState([])
   const [filteredManagers, setFilteredManagers] = useState([])
   const [leagues, setLeagues] = useState([])
-  const [timestmp, setTimestmp] = useState(0)
+  const [timestmp, setTimestmp] = useState(null)
   const [sortOpts, setSortOpts] = useState( { key: 'md', order: 1 } )
   const [filter, setFilter] = useState(new RegExp('', 'iu'))
   const [toggledLeagues, setToggledLeagues] = useState([])
@@ -133,9 +134,18 @@ export default function Home() {
     if(managers[0]?.id) {
       const unsorted = [...managers]
       const sorted = sortData(unsorted, sortOpts.key, sortOpts.order);
-      setManagers(sorted)
+      setFilteredManagers(sorted)
     }
   },[sortOpts.order, sortOpts.key])
+
+  useEffect(() => {
+    if(managers[0]?.id) {
+      const filtered = managers.filter(m => m.leagues.find(l => toggledLeagues.includes(l)))
+      const unsorted = [...filtered]
+      const sorted = sortData(unsorted, sortOpts.key, sortOpts.order);
+      setFilteredManagers(sorted)
+    }
+  },[toggledLeagues])
 
   return (
     <div>

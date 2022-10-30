@@ -24,13 +24,13 @@ tbody td:nth-of-type(2) > a:hover {
   @apply text-sky-300;
 }
 
-table {   
+.standings {   
   counter-reset: rowNumber;
 }
-table tbody tr {
+.standings tbody tr {
   counter-increment: rowNumber;
 }
-table tbody tr td:first-child:before {   
+.standings tbody tr td:first-child:before {   
   content: counter(rowNumber);
 }
 .league-shadow {

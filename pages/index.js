@@ -96,6 +96,23 @@ function LeagueToggler({ leagues, toggledLeagues, setToggledLeagues, managers, s
   )
 }
 
+function useDebounceValue(value, time=500) {
+  const [debounceValue, setDebounceValue] = useState(value)
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebounceValue(value)
+    }, time)
+
+    return () => {
+      clearTimeout(timer)
+    }
+  }, [value, time])
+
+  return debounceValue
+
+}
+
 export default function Home() {
   const [managers, setManagers] = useState([])
   const [filteredManagers, setFilteredManagers] = useState([])
@@ -104,6 +121,7 @@ export default function Home() {
   const [sortOpts, setSortOpts] = useState( { key: 'md', order: 1 } )
   const [filter, setFilter] = useState(new RegExp('', 'iu'))
   const [toggledLeagues, setToggledLeagues] = useState([])
+  const debounceFilter = useDebounceValue(filter)
 
   function handleChange(e) {
     const string = e.target.value.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
@@ -163,9 +181,9 @@ export default function Home() {
                        setToggledLeagues={setToggledLeagues}
                        sortOpts={sortOpts}
                        managers={managers}
-                       setFilteredManagers={setFilteredManagers}/>  
+                       setFilteredManagers={setFilteredManagers}/>
         <input className='w-1/3 mb-1 ml-0 text-lg bg-slate-700 focus:bg-slate-600 focus:outline-0 shadow-inner shadow-gray-800/100' onChange={handleChange}/>
-        <Table setSortOpts={setSortOpts} filter={filter} toggledLeagues={toggledLeagues} managers={managers} filteredManagers={filteredManagers}/>
+        <Table setSortOpts={setSortOpts} filter={debounceFilter} toggledLeagues={toggledLeagues} managers={managers} filteredManagers={filteredManagers}/>
       </main>
       <footer>
         <p></p>

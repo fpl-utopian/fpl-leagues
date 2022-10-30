@@ -2,6 +2,7 @@ import Head from 'next/head'
 import { useEffect, useState } from 'react'
 import bgColors from '../utils/painter'
 import sortData from '../utils/sort'
+import dateFormater from '../utils/date'
 
 function Row({ rdata, i, hidden, bgStyle}) {
   const { id, player_name, leagues } = rdata
@@ -76,9 +77,10 @@ function LeagueToggler({ leagues, toggledLeagues, setToggledLeagues }) {
       {leagues[0]?.id && leagues.map((league,id) => {
         return (
         <div key={id}>
-          <input onChange={handleToggle} type="checkbox"
+          <input className='w-4 h-4 text-blue-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600'
+                 onChange={handleToggle} type="checkbox"
                  id={league.id} name={league.id} defaultChecked={toggledLeagues.includes(league.id) ? true : false}/>
-          <label className={bgColors[league.id]} htmlFor={league.id}> {league.name}</label>
+          <label className={`ml-2 league-shadow pr-1 rounded ${bgColors[league.id]}`} htmlFor={league.id}> {league.name}</label>
         </div>
         )}
       )}
@@ -89,7 +91,7 @@ function LeagueToggler({ leagues, toggledLeagues, setToggledLeagues }) {
 export default function Home() {
   const [managers, setManagers] = useState([])
   const [leagues, setLeagues] = useState([])
-  const [timestamp, setTimestamp] = useState(0)
+  const [timestmp, setTimestmp] = useState(0)
   const [sortOpts, setSortOpts] = useState( { key: 'md', order: 1 } )
   const [filter, setFilter] = useState(new RegExp('', 'iu'))
   const [toggledLeagues, setToggledLeagues] = useState([])
@@ -114,7 +116,7 @@ export default function Home() {
         setManagers(sorted)
         setLeagues(json.leagues)
         setToggledLeagues(json.leagues.map(l=>l.id))
-        setTimestamp(json.timestamp)
+        setTimestmp(dateFormater(json.timestamp))
       })
   },[])
 
@@ -134,6 +136,9 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className='w-fit mx-auto flex flex-col justify-center'>
+        <div className='flex flex-row-reverse'>
+          <span className='block text-sm self-end'>{timestmp}</span>
+        </div>
         <LeagueToggler leagues={leagues} toggledLeagues={toggledLeagues} setToggledLeagues={setToggledLeagues}/>  
         <input className='w-1/3 mb-1 ml-0 text-lg bg-slate-700 focus:bg-slate-600 focus:outline-0 shadow-inner shadow-gray-800/100' onChange={handleChange}/>
         <Table setSortOpts={setSortOpts} filter={filter} toggledLeagues={toggledLeagues} managers={managers}/>

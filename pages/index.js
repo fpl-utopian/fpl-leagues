@@ -11,7 +11,7 @@ function Row({ rdata, i, hidden, bgStyle}) {
 
   return (
     <tr className={`${hidden} ${bgStyle} border-y border-slate-700 opacity-80`}>
-      <td className='text-center'></td>
+      <td className='text-center'>{i}</td>
       <td className='text-left'>
         <a href={`https://fantasy.premierleague.com/entry/${id}/history`}
            title={id} rel="noreferrer" target='_blank'>{player_name}</a>
@@ -25,7 +25,7 @@ function Row({ rdata, i, hidden, bgStyle}) {
   )
 }
 
-function Table({ setSortOpts, filter, toggledLeagues, managers }) {
+function Table({ setSortOpts, filter, toggledLeagues, managers, filteredManagers }) {
   
   const mappedKeys = { nr: '#',
                     player_name: 'Manager',
@@ -44,7 +44,7 @@ function Table({ setSortOpts, filter, toggledLeagues, managers }) {
   }
 
   return (
-    <table className="text-right border border-slate-700 ...">
+    <table className="standingss text-right border border-slate-700 ...">
       <thead>
         <tr className='text-center hover:cursor-pointer'>
           {Object.keys(mappedKeys).map((k,i,arr) => {
@@ -53,7 +53,7 @@ function Table({ setSortOpts, filter, toggledLeagues, managers }) {
         </tr>
       </thead>
       <tbody>
-        {managers[0]?.id && managers.map((entry, i) => {
+        {filteredManagers[0]?.id && filteredManagers.map((entry, i) => {
             const hidden = (toggledLeagues.find(l=>entry.leagues.includes(l)) && filter.test(entry.player_name)) ? "" : "hidden "
             const leagueColor = hidden !== 'hidden ' ? bgColors[toggledLeagues.find(l => entry.leagues.includes(l))] : 'bg-inherit'
             return <Row key={entry.id} rdata={entry} i={i+1} hidden={hidden} bgStyle={leagueColor}/>
@@ -64,13 +64,15 @@ function Table({ setSortOpts, filter, toggledLeagues, managers }) {
   )
 }
 
-function LeagueToggler({ leagues, toggledLeagues, setToggledLeagues, sortOpts, managers }) {
+function LeagueToggler({ leagues, toggledLeagues, setToggledLeagues, managers, setFilteredManagers }) {
   
   function handleToggle(e) {
     const id = Number(e.target.name)
     e.target.checked
       ? !toggledLeagues.includes(id) && setToggledLeagues(l=>[...l, id])
       : setToggledLeagues(l=>l.filter(s => s !== id))
+    const filtered = managers.filter(m => m.leagues.find(l => toggledLeagues.includes(l)))
+    setFilteredManagers(filtered)
   }
 
   return (
@@ -95,6 +97,7 @@ function LeagueToggler({ leagues, toggledLeagues, setToggledLeagues, sortOpts, m
 
 export default function Home() {
   const [managers, setManagers] = useState([])
+  const [filteredManagers, setFilteredManagers] = useState([])
   const [leagues, setLeagues] = useState([])
   const [timestmp, setTimestmp] = useState(0)
   const [sortOpts, setSortOpts] = useState( { key: 'md', order: 1 } )
@@ -119,6 +122,7 @@ export default function Home() {
         const unsorted = [...json.managers]
         const sorted = sortData(unsorted, sortOpts.key, sortOpts.order);
         setManagers(sorted)
+        setFilteredManagers(sorted)
         setLeagues(json.leagues)
         setToggledLeagues(json.leagues.map(l=>l.id))
         setTimestmp(dateFormater(json.timestamp))
@@ -144,9 +148,14 @@ export default function Home() {
         <div className='flex flex-row-reverse'>
           <span className='block text-sm self-end'>{timestmp}</span>
         </div>
-        <LeagueToggler leagues={leagues} toggledLeagues={toggledLeagues} setToggledLeagues={setToggledLeagues} sortOpts={sortOpts} managers={managers}/>  
+        <LeagueToggler leagues={leagues}
+                       toggledLeagues={toggledLeagues}
+                       setToggledLeagues={setToggledLeagues}
+                       sortOpts={sortOpts}
+                       managers={managers}
+                       setFilteredManagers={setFilteredManagers}/>  
         <input className='w-1/3 mb-1 ml-0 text-lg bg-slate-700 focus:bg-slate-600 focus:outline-0 shadow-inner shadow-gray-800/100' onChange={handleChange}/>
-        <Table setSortOpts={setSortOpts} filter={filter} toggledLeagues={toggledLeagues} managers={managers}/>
+        <Table setSortOpts={setSortOpts} filter={filter} toggledLeagues={toggledLeagues} managers={managers} filteredManagers={filteredManagers}/>
       </main>
       <footer>
         <p></p>

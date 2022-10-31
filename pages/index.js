@@ -59,7 +59,6 @@ function Table({ setSortOpts, filter, toggledLeagues, filteredManagers }) {
               hidden = 'hidden '
             }
             const leagueColor =  hidden !== 'hidden ' ? bgColors[toggledLeagues.find(l => entry.leagues.includes(l))] : 'bg-inherit'
-            //const leagueColor =  bgColors[entry.leagues[0]]
             return <Row key={entry.id} rdata={entry} i={i+1} hidden={hidden} bgStyle={leagueColor}/>
           })
       }

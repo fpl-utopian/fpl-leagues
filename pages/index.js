@@ -5,23 +5,28 @@ import sortData from '../utils/sort'
 import dateFormater from '../utils/date'
 import objectToCSV from '../utils/csv'
 
-function Row({ rdata, i, hidden, bgStyle}) {
+function Row({ rdata, i, hidden, bgStyle, otherLeagues }) {
   const { id, player_name, leagues } = rdata
   const { fpl, md, xG, odds, variance } = rdata.scores
-  const varc = Math.round(Number(variance) * 1000)/10
 
   return (
     <tr className={`${hidden} ${bgStyle} border-y border-slate-700 opacity-80`}>
       <td className='text-center'>{i}</td>
-      <td className='text-left'>
+      <td className='relative text-left'>
         <a href={`https://fantasy.premierleague.com/entry/${id}/history`}
-           title={id} rel="noreferrer" target='_blank'>{player_name}</a>
-        </td>
+           title={id} rel="noreferrer" target='_blank'>{player_name}
+        </a>
+        <div className='absolute top-0 right-0 ...' width='0.75rem'>
+          <div className='flex-col w-full h-full'>
+            {otherLeagues && otherLeagues.map((l) => <svg key={l} className={`block h-2 ${bgColors[l]}`} width='1rem'></svg>)}
+          </div>
+        </div>
+      </td>
       <td>{fpl}</td>
       <td>{md}</td>
       <td>{odds}</td>
       <td>{xG}</td>
-      <td className='text-center ...'>{varc}</td>
+      <td className='text-center ...'>{variance}</td>
     </tr>
   )
 }
@@ -51,18 +56,22 @@ function Table({ sortOpts, setSortOpts, filter, toggledLeagues, filteredManagers
           {Object.keys(mappedKeys).map((k) => {
             const order = sortOpts.order === -1 ? 'border-b' : 'border-t' 
             const columnBorder = sortOpts.key === k ? `border-x ${order} border-sky-600` : 'border-slate-600'
-            return <th className={`px-2 py-1 ${columnBorder} ...`} key={k} id={k} onClick={handleClick}>{mappedKeys[k]}</th>
+            return <th className={`relative px-2 py-1 ${columnBorder} ...`} key={k} id={k} onClick={handleClick}>{mappedKeys[k]}</th>
             })}
         </tr>
       </thead>
       <tbody>
         {filteredManagers[0]?.id && filteredManagers.map((entry, i) => {
             let hidden
-            if(!(toggledLeagues.find(l=>entry.leagues.includes(l)) && filter.test(entry.player_name))) {
+            let primeLeague = toggledLeagues.find(l=>entry.leagues.includes(l)) 
+            let otherLeagues = ''
+            if(!(primeLeague && filter.test(entry.player_name))) {
               hidden = 'hidden '
+            } else {
+              otherLeagues = toggledLeagues.filter(l=>entry.leagues.includes(l) && l!==primeLeague)
             }
-            const leagueColor =  hidden !== 'hidden ' ? bgColors[toggledLeagues.find(l => entry.leagues.includes(l))] : 'bg-inherit'
-            return <Row key={entry.id} rdata={entry} i={i+1} hidden={hidden} bgStyle={leagueColor}/>
+            const leagueColor =  hidden !== 'hidden ' ? bgColors[primeLeague] : 'bg-inherit'
+            return <Row key={entry.id} rdata={entry} i={i+1} hidden={hidden} bgStyle={leagueColor} otherLeagues={otherLeagues}/>
           })
       }
       </tbody>
@@ -186,7 +195,7 @@ export default function Home() {
     <div>
       <Head>
         <title>Analytics and friends</title>
-        <meta name="description" content="Underlying FPL rankings" />
+        <meta name="description" content="FPL rankings" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className='w-fit mx-auto flex flex-col justify-center'>

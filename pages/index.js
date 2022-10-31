@@ -25,7 +25,7 @@ function Row({ rdata, i, hidden, bgStyle}) {
   )
 }
 
-function Table({ setSortOpts, filter, toggledLeagues, managers, filteredManagers }) {
+function Table({ setSortOpts, filter, toggledLeagues, filteredManagers }) {
   
   const mappedKeys = { nr: '#',
                     player_name: 'Manager',
@@ -54,7 +54,10 @@ function Table({ setSortOpts, filter, toggledLeagues, managers, filteredManagers
       </thead>
       <tbody>
         {filteredManagers[0]?.id && filteredManagers.map((entry, i) => {
-            const hidden = (toggledLeagues.find(l=>entry.leagues.includes(l)) && filter.test(entry.player_name)) ? "" : "hidden "
+            let hidden
+            if(!(toggledLeagues.find(l=>entry.leagues.includes(l)) && filter.test(entry.player_name))) {
+              hidden = 'hidden '
+            }
             const leagueColor =  hidden !== 'hidden ' ? bgColors[toggledLeagues.find(l => entry.leagues.includes(l))] : 'bg-inherit'
             //const leagueColor =  bgColors[entry.leagues[0]]
             return <Row key={entry.id} rdata={entry} i={i+1} hidden={hidden} bgStyle={leagueColor}/>
@@ -65,15 +68,13 @@ function Table({ setSortOpts, filter, toggledLeagues, managers, filteredManagers
   )
 }
 
-function LeagueToggler({ leagues, toggledLeagues, setToggledLeagues, managers, setFilteredManagers }) {
+function LeagueToggler({ leagues, toggledLeagues, setToggledLeagues }) {
   
   function handleToggle(e) {
     const id = Number(e.target.name)
     e.target.checked
       ? !toggledLeagues.includes(id) && setToggledLeagues(l=>[...l, id])
       : setToggledLeagues(l=>l.filter(s => s !== id))
-    const filtered = managers.filter(m => m.leagues.find(l => toggledLeagues.includes(l)))
-    setFilteredManagers(filtered)
   }
 
   return (
@@ -150,7 +151,7 @@ export default function Home() {
 
   useEffect(() => {
     if(managers[0]?.id) {
-      const unsorted = [...managers]
+      const unsorted = [...filteredManagers]
       const sorted = sortData(unsorted, sortOpts.key, sortOpts.order);
       setFilteredManagers(sorted)
     }

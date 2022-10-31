@@ -1,8 +1,9 @@
 import Head from 'next/head'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, createElement } from 'react'
 import bgColors from '../utils/painter'
 import sortData from '../utils/sort'
 import dateFormater from '../utils/date'
+import objectToCSV from '../utils/csv'
 
 function Row({ rdata, i, hidden, bgStyle}) {
   const { id, player_name, leagues } = rdata
@@ -115,6 +116,20 @@ function useDebounceValue(value, time=500) {
 
 }
 
+function CSVDownloader( { table } ) {
+
+  function handleClick(e) {
+    const blob = new Blob([objectToCSV(table, { type: 'text/csv' })])
+    e.target.href = URL.createObjectURL(blob)
+  }
+
+  return createElement(
+    'a',
+    { className: 'p-0.5 bg-slate-50 text-sm rounded text-slate-800', download: 'fpl-leagues.csv', href: '#', onClick: handleClick },
+    'Export to CSV'
+  )
+}
+
 export default function Home() {
   const [managers, setManagers] = useState([])
   const [filteredManagers, setFilteredManagers] = useState([])
@@ -175,8 +190,9 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className='w-fit mx-auto flex flex-col justify-center'>
-        <div className='flex flex-row-reverse'>
-          <span className='block text-sm self-end'>{timestmp}</span>
+        <div className='m-1 flex flex-row justify-between'>
+          <CSVDownloader table={filteredManagers}/>
+          <span className='block text-sm self-start'>{timestmp}</span>
         </div>
         <LeagueToggler leagues={leagues}
                        toggledLeagues={toggledLeagues}

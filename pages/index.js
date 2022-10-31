@@ -25,7 +25,7 @@ function Row({ rdata, i, hidden, bgStyle}) {
   )
 }
 
-function Table({ setSortOpts, filter, toggledLeagues, filteredManagers }) {
+function Table({ sortOpts, setSortOpts, filter, toggledLeagues, filteredManagers }) {
   
   const mappedKeys = { nr: '#',
                     player_name: 'Manager',
@@ -47,8 +47,10 @@ function Table({ setSortOpts, filter, toggledLeagues, filteredManagers }) {
     <table className="standingss text-right border border-slate-700 ...">
       <thead>
         <tr className='text-center hover:cursor-pointer'>
-          {Object.keys(mappedKeys).map((k,i,arr) => {
-            return <th className="px-2 py-1 border border-slate-600 ..." key={k} id={k} onClick={handleClick}>{mappedKeys[k]}</th>
+          {Object.keys(mappedKeys).map((k) => {
+            const order = sortOpts.order === -1 ? 'border-b' : 'border-t' 
+            const columnBorder = sortOpts.key === k ? `border-x ${order} border-sky-600` : 'border-slate-600'
+            return <th className={`px-2 py-1 ${columnBorder} ...`} key={k} id={k} onClick={handleClick}>{mappedKeys[k]}</th>
             })}
         </tr>
       </thead>
@@ -180,7 +182,7 @@ export default function Home() {
                        managers={managers}
                        setFilteredManagers={setFilteredManagers}/>
         <input className='w-1/3 mb-1 ml-0 text-lg bg-slate-700 focus:bg-slate-600 focus:outline-0 shadow-inner shadow-gray-800/100' onChange={handleChange}/>
-        <Table setSortOpts={setSortOpts} filter={debounceFilter} toggledLeagues={toggledLeagues} managers={managers} filteredManagers={filteredManagers}/>
+        <Table sortOpts={sortOpts} setSortOpts={setSortOpts} filter={debounceFilter} toggledLeagues={toggledLeagues} managers={managers} filteredManagers={filteredManagers}/>
       </main>
       <footer>
         <p></p>

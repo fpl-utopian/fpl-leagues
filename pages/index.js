@@ -143,7 +143,7 @@ export default function Home() {
   const [managers, setManagers] = useState([])
   const [filteredManagers, setFilteredManagers] = useState([])
   const [leagues, setLeagues] = useState([])
-  const [timestmp, setTimestmp] = useState(null)
+  const [timestmp, setTimestmp] = useState()
   const [sortOpts, setSortOpts] = useState( { key: 'md', order: 1 } )
   const [filter, setFilter] = useState(new RegExp('', 'iu'))
   const [toggledLeagues, setToggledLeagues] = useState([])
